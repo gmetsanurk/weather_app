@@ -22,7 +22,7 @@ class ViewController: UIViewController {
         let icon = UIImageView()
         let weatherIconImage = UIImage(named: "weatherIcon")
         icon.image = weatherIconImage
-        icon.layer.cornerRadius = 25
+        icon.layer.cornerRadius = 35
         icon.clipsToBounds = true
         icon.translatesAutoresizingMaskIntoConstraints = false
         return icon
@@ -48,11 +48,25 @@ class ViewController: UIViewController {
         
         createConstraints()
     }
-
+    
+    //MARK: - func
     @objc func didTapGetWeatherButton() {
-        temperatureLabel.text = "Tap"
+        let urlString = "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m"
+        let url = URL(string: urlString)!
+        let request = URLRequest(url: url)
+        let task = URLSession.shared.dataTask(with: request) {data, response, error in
+            if let data, let weather = try? JSONDecoder().decode(WeatherData.self, from: data) {
+                DispatchQueue.main.async {
+                    self.temperatureLabel.text = "\(weather.current.temperature2M) °C"
+                }
+            } else {
+                print("fail!")
+            }
+        }
+        task.resume()
     }
     
+    //MARK: - Constraints
     func createConstraints() {
         NSLayoutConstraint.activate([
             temperatureLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 200),
